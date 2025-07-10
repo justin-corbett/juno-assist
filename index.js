@@ -1,5 +1,5 @@
 // Initialize GSAP
-gsap.registerPlugin(ScrollTrigger, SplitText, Observer, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger, SplitText, Observer, ScrollToPlugin, Flip);
 
 // Lenis smooth scroll
 // Initialize a new Lenis instance for smooth scrolling
@@ -220,8 +220,8 @@ document.fonts.ready.then(() => {
 });
 
 
-// Cards Pin
-const root = document.querySelector('.scroll-track.is-section_facts')
+// Cards Pin – Facts
+const root = document.querySelector('.section-cards')
 const pinHeight = root.querySelector('.pin-height')
 const container = root.querySelector('.pin-container')
 
@@ -271,6 +271,59 @@ tl.to(cards, {
     ease: 'power3.in', // Slows down at the beginning of the rotation
 }, 'step+=0.5') // Starts halfway through the movement tween
 
+
+
+
+// Cards Pin – Features
+const root2 = document.querySelector('.section-features')
+const pinHeight2 = root2.querySelector('.pin-height')
+const container2 = root2.querySelector('.pin-container')
+
+ScrollTrigger.create({
+    trigger: pinHeight2, // We listen to pinHeight position
+    start:'top top',
+    end:'bottom bottom',
+    pin: container2, // We pin our container
+    // No extra space is added around the pinned element
+    pinSpacing: false,
+    scrub: true // Progresses with the scroll
+})
+
+const cards2 = root2.querySelectorAll('.pin-card')
+
+gsap.set(cards2, {
+  yPercent: 50, // Translate by half the element’s height
+  y: 0.5 * window.innerHeight, // Translate by half the screen’s height
+})
+
+const tl2 = gsap.timeline({
+  scrollTrigger: {
+      trigger: root2, // Based on the root of our component  
+      start: 'top top', // Starts when the top of root reaches the top of the viewport  
+      end: 'bottom bottom', // Ends when the bottom of root reaches the bottom of the viewport  
+      scrub: true, // Progresses with the scroll
+  }
+})
+
+tl2.to(cards2, {
+    yPercent: -50, // Translate by half the element’s height
+    y: -0.5 * window.innerHeight, // Translate by half the screen’s height
+    duration: 1,
+    stagger: 0.12,
+    ease: CustomEase.create("custom", "M0,0 C0,0 0.03,0.8 0.5,0.5 0.8,0.4 1,1 1,1"),
+}, 'step') // The other 'step' tweens will start simultaneously in our timeline
+tl2.to(cards2, {
+    rotation: () => { return (Math.random() - 0.5) * 20 }, // Method to have a unique value per card
+    stagger: 0.12,
+    duration: 0.5, // Lasts half as long as the movement tween
+    ease: 'power3.out', // Slows down towards the end of the rotation
+}, 'step')
+tl2.to(cards2, {
+    rotation: 0,
+    stagger: 0.12,
+    duration: 0.5, // Lasts half as long as the movement tween
+    ease: 'power3.in', // Slows down at the beginning of the rotation
+}, 'step+=0.5') // Starts halfway through the movement tween
 
 
 
@@ -337,6 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initStickyTitleScroll();
 });
 
+
 // Image Scale
 
 // For each image-wrap on the page...
@@ -364,8 +418,6 @@ gsap.utils.toArray(".image-wrap").forEach(wrap => {
 });
 
 // Marquee
-
-// Note: The Javascript is optional. Read the documentation below how to use the CSS Only version.
 
 function initCSSMarquee() {
   const pixelsPerSecond = 75; // Set the marquee speed (pixels per second)
@@ -442,67 +494,192 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// GSAP Flip
+function initFlipOnScroll() {
+  let wrapperElements = document.querySelectorAll("[data-flip-element='wrapper']");
+  let targetEl = document.querySelector("[data-flip-element='target']");
 
+  let tl;
+  function flipTimeline() {
+    if (tl) {
+      tl.kill();
+      gsap.set(targetEl, { clearProps: "all" });
+    }
+    
+    // Use the first and last wrapper elements for the scroll trigger.
+    tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapperElements[0],
+        start: "center 25%",
+        endTrigger: wrapperElements[wrapperElements.length - 1],
+        end: "center center",
+        scrub: 0.25,
+        markers: false,
+      }
+    });
+    
+    // Loop through each wrapper element.
+    wrapperElements.forEach(function(element, index) {
+      let nextIndex = index + 1;
+      if (nextIndex < wrapperElements.length) {
+        let nextWrapperEl = wrapperElements[nextIndex];
+        // Calculate vertical center positions relative to the document.
+        let nextRect = nextWrapperEl.getBoundingClientRect();
+        let thisRect = element.getBoundingClientRect();
+        let nextDistance = nextRect.top + window.pageYOffset + nextWrapperEl.offsetHeight / 2;
+        let thisDistance = thisRect.top + window.pageYOffset + element.offsetHeight / 2;
+        let offset = nextDistance - thisDistance;
+        // Add the Flip.fit tween to the timeline.
+        tl.add(
+          Flip.fit(targetEl, nextWrapperEl, {
+            duration: offset,
+            ease: "power1.inOut"
+          })
+        );
+      }
+    });
+  }
 
+  flipTimeline();
 
+  let resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      flipTimeline();
+    }, 100);
+  });
+}
 
+// Initialize Scaling Elements on Scroll (GSAP Flip)
+document.addEventListener('DOMContentLoaded', function() {
+  initFlipOnScroll();
+});
 
-// Feature Cards
-window.addEventListener("DOMContentLoaded", () => {
+// Button Hover
+$(".btn_wrap").each(function (index, btnWrap) {
+  // Get child elements of the current button wrapper
+  let bgPanel = $(btnWrap).children().eq(0);
+  let fgPanel = $(btnWrap).children().eq(1);
 
-    const pinHeight = document.querySelector('.features-pin-height')
-    const circles = document.querySelectorAll('.circle')
+  // Create a timeline for this button
+  let tl = gsap.timeline({ paused: true, defaults: { duration: 0.1, ease: "none" } });
+  tl.set(bgPanel, { opacity: 1 });
+  tl.fromTo(fgPanel, { clipPath: "polygon(100% 0%, 100% 100%, 100% 100%, 0% 100%, 0% 0%)" }, { clipPath: "polygon(100% 0%, 100% 0%, 0% 100%, 0% 100%, 0% 0%)" });
+  tl.fromTo(bgPanel, { clipPath: "polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%)" }, { clipPath: "polygon(100% 0%, 100% 100%, 0% 100%, 0% 100%, 100% 0%)" }, "<");
+  tl.to(fgPanel, { clipPath: "polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%)" });
+  tl.to(bgPanel, { clipPath: "polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%, 0% 0%)" }, "<");
 
-    gsap.fromTo('.circles', {
-        y: '5%' // The `circles` div starts at 5% of its height on the y-axis
-    }, {
-        y: '-5%', // And ends at -5% of its height on the y-axis
-        ease: 'none',
-        scrollTrigger: {
-            trigger: pinHeight, // Monitor the position of pin-height
-            start: 'top top',
-            end: 'bottom bottom',
-            pin: '.features-container', // Pin the container in place
-            scrub: true // Progress linked to scrolling
+  // Attach hover events to the current button
+  $(btnWrap).on("mouseenter", function () {
+    tl.play();
+  });
+
+  $(btnWrap).on("mouseleave", function () {
+    tl.reverse();
+  });
+});
+
+// Contact Form – Checkbox Label Colour Change On Selected
+// Select all checkboxes with the class '.checkbox'
+document.querySelectorAll('.radio_field').forEach(component => {
+  // Select the .w-checkbox-input element within each component
+  const checkboxInput = component.querySelector('.w-form-formradioinput');
+  const textCheckbox = component.querySelector('.radio_label');
+
+  if (checkboxInput && textCheckbox) {
+    // Create a MutationObserver to watch for class changes
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.attributeName === 'class') {
+          // Check if the class 'w--redirected-checked' is present
+          if (checkboxInput.classList.contains('w--redirected-checked')) {
+            textCheckbox.style.color = '#fff'; // Change color to black
+          } else {
+            textCheckbox.style.color = ''; // Reset color
+          }
         }
-    })
+      });
+    });
 
-    // Calculate half of the fan range
-    let angle = 3, 
-        halfRange = (circles.length - 1) * angle / 2,
-        rot = -halfRange
+    // Observe class attribute changes on the checkbox input
+    observer.observe(checkboxInput, { attributes: true });
+  }
+});
 
-    const distPerCard = (pinHeight.clientHeight - window.innerHeight) / circles.length
-        
-    circles.forEach( (circle, index) => {
-        
-        gsap.to(circle, {
-            rotation: rot, // The circle starts at 0° and ends at the `rot` value
-            ease: 'power1.out',
-            scrollTrigger: {
-                trigger: pinHeight, // Monitor the position of pin-height
-                // Animation starts at distPerCard * the index of the card
-                start: 'top top-=' + (distPerCard) * index,
-                // And lasts exactly for distPerCard
-                end: '+=' + (distPerCard),
-                scrub: true // Progress linked to scrolling
-            }  
-        })
-        gsap.to(circle.querySelector('.feature-card'), {
-            // Optional: Apply 'rot' to the card to enhance the rotation effect
-            rotation: rot,
-            y: '-50%', // Positions the card in the center of the viewport
-            ease: 'power1.out',
-            scrollTrigger: {
-                trigger: pinHeight, // Monitor the position of pin-height
-                // Animation starts at distPerCard * the index of the card
-                start: 'top top-=' + (distPerCard) * index,
-                // And lasts exactly for distPerCard
-                end: '+=' + (distPerCard),
-                scrub: true // Progress linked to scrolling
-            }  
-        })
+// All Pages – Form Submit Button Text Update On Submit
+document.addEventListener('DOMContentLoaded', function () {
+  // Add an event listener for form submission
+  document.querySelectorAll('.form.is-contact').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      // Find all elements inside the form with the class 'text-button'
+      const textButtons = form.querySelectorAll('.text-button');
 
-        rot += angle
-    })
+      // Update the text content of each '.text-button' element
+      textButtons.forEach(button => {
+        button.textContent = 'Please wait...';
+      });
+
+      // Optional: Revert the text if submission takes too long
+      setTimeout(() => {
+        textButtons.forEach(button => {
+          button.textContent = 'Submit'; // Adjust text as needed
+        });
+      }, 5000); // Adjust delay as needed
+    });
+  });
+});
+
+// Contact form custom success message
+// when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+  // declare constant selectors
+  const FORM_SELECTOR = '[fs-contact="form"]';
+  const NAME_INPUT_SELECTOR = '[fs-contact="name-input"]';
+  const MESSAGE_SELECTOR = '[fs-contact="custom-message"]';
+  const form = document.querySelector(FORM_SELECTOR);
+
+  // early return
+  if (!form) return;
+  const nameInput = form.querySelector(NAME_INPUT_SELECTOR);
+  const messageDiv = document.querySelector(MESSAGE_SELECTOR);
+
+  if (!nameInput || !messageDiv) return;
+
+  // when form is submitted
+  nameInput.addEventListener('input', function () {
+    const nameValue = nameInput.value;
+
+    if (nameValue && nameValue !== '') {
+      messageDiv.innerText = `Thanks ${nameValue}! We will get back to you within 1-2 business days.`;
+    } else {
+      messageDiv.innerText = 'Thanks, we have received your message and will get back to you.';
+    }
+  });
+});
+
+// Subscribe form – fields change
+$(".field").on("focusin", function () {
+  $(this).siblings(".field_label").removeClass("large");
+});
+$(".field").on("focusout", function () {
+  if ($(this).val().length == 0) {
+    $(this).siblings(".field_label").addClass("large");
+  }
+});
+
+// Letter animate effect
+gsap.to('.centred-title', {
+    yPercent: 100, // Moves the letter down by 100% of its height
+    ease: 'power1.inOut', // Non-linear motion
+    scrollTrigger: {
+        trigger: '.centred-title-block', // Listens to the list position
+        start: '33.33% bottom',
+        end: '100% 80%',
+        scrub: 1 // Progresses with the scroll, takes 1s to update
+    },
+    stagger: {
+        each: 0.05,
+        from: 'random' // Randomizes the animation order of letters
+    }
 })
