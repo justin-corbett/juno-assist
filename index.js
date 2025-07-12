@@ -374,7 +374,7 @@ document.querySelectorAll('.radio_field').forEach(component => {
         if (mutation.attributeName === 'class') {
           // Check if the class 'w--redirected-checked' is present
           if (checkboxInput.classList.contains('w--redirected-checked')) {
-            textCheckbox.style.color = '#fff'; // Change color to black
+            textCheckbox.style.color = '#301b1b'; // Change color to black
           } else {
             textCheckbox.style.color = ''; // Reset color
           }
