@@ -20,93 +20,6 @@ gsap.ticker.add((time) => {
 gsap.ticker.lagSmoothing(0);
 
 
-
-// Navigation
-function initProgressNavigation() {
-  // Cache the parent container
-  let navProgress = document.querySelector('[data-progress-nav-list]');
-
-  // Create or select the moving indicator
-  let indicator = navProgress.querySelector('.progress-nav__indicator');
-  if (!indicator) {
-    indicator = document.createElement('div');
-    indicator.className = 'progress-nav__indicator';
-    navProgress.appendChild(indicator);
-  }
-  
-  // Function to update the indicator based on the active nav link
-  function updateIndicator(activeLink) {
-    let parentWidth = navProgress.offsetWidth;
-    let parentHeight = navProgress.offsetHeight;
-    
-    // Get the active link's position relative to the parent
-    let parentRect = navProgress.getBoundingClientRect();
-    let linkRect = activeLink.getBoundingClientRect();
-    let linkPos = {
-      left: linkRect.left - parentRect.left,
-      top: linkRect.top - parentRect.top
-    };
-    
-    let linkWidth = activeLink.offsetWidth;
-    let linkHeight = activeLink.offsetHeight;
-    
-    // Calculate percentage values relative to parent dimensions
-    let leftPercent = (linkPos.left / parentWidth) * 100;
-    let topPercent = (linkPos.top / parentHeight) * 100;
-    let widthPercent = (linkWidth / parentWidth) * 100;
-    let heightPercent = (linkHeight / parentHeight) * 100;
-       
-    // Update the indicator with a smooth CSS transition (set in your CSS)
-    indicator.style.left = leftPercent + '%';
-    indicator.style.top = topPercent + '%';
-    indicator.style.width = widthPercent + '%';
-    indicator.style.height = heightPercent + '%';
-  }
-  
-  // Get all anchor sections
-  let progressAnchors = gsap.utils.toArray('[data-progress-nav-anchor]');
-
-  progressAnchors.forEach((progressAnchor) => {
-    let anchorID = progressAnchor.getAttribute('id');
-    
-    ScrollTrigger.create({
-      trigger: progressAnchor,
-      start: '0% 50%',
-      end: '100% 50%',
-      onEnter: () => {
-        let activeLink = navProgress.querySelector('[data-progress-nav-target="#' + anchorID + '"]');
-        activeLink.classList.add('is--active');
-        // Remove 'is--active' class from sibling links
-        let siblings = navProgress.querySelectorAll('[data-progress-nav-target]');
-        siblings.forEach((sib) => {
-          if (sib !== activeLink) {
-            sib.classList.remove('is--active');
-          }
-        });
-        updateIndicator(activeLink);
-      },
-      onEnterBack: () => {
-        let activeLink = navProgress.querySelector('[data-progress-nav-target="#' + anchorID + '"]');
-        activeLink.classList.add('is--active');
-        // Remove 'is--active' class from sibling links
-        let siblings = navProgress.querySelectorAll('[data-progress-nav-target]');
-        siblings.forEach((sib) => {
-          if (sib !== activeLink) {
-            sib.classList.remove('is--active');
-          }
-        });
-        updateIndicator(activeLink);
-      }
-    });
-  });
-}
-
-// Initialize One Page Progress Navigation
-document.addEventListener('DOMContentLoaded', () => {
-  initProgressNavigation();
-});
-
-
 // Loader
 
 function initWelcomingWordsLoader() {  
@@ -219,114 +132,6 @@ document.fonts.ready.then(() => {
     });
 });
 
-
-// Cards Pin – Facts
-const root = document.querySelector('.section-cards')
-const pinHeight = root.querySelector('.pin-height')
-const container = root.querySelector('.pin-container')
-
-ScrollTrigger.create({
-    trigger: pinHeight, // We listen to pinHeight position
-    start:'top top',
-    end:'bottom bottom',
-    pin: container, // We pin our container
-    // No extra space is added around the pinned element
-    pinSpacing: false,
-    scrub: true // Progresses with the scroll
-})
-
-const cards = root.querySelectorAll('.pin-card')
-
-gsap.set(cards, {
-  yPercent: 50, // Translate by half the element’s height
-  y: 0.5 * window.innerHeight, // Translate by half the screen’s height
-})
-
-const tl = gsap.timeline({
-  scrollTrigger: {
-      trigger: root, // Based on the root of our component  
-      start: 'top top', // Starts when the top of root reaches the top of the viewport  
-      end: 'bottom bottom', // Ends when the bottom of root reaches the bottom of the viewport  
-      scrub: true, // Progresses with the scroll
-  }
-})
-
-tl.to(cards, {
-    yPercent: -50, // Translate by half the element’s height
-    y: -0.5 * window.innerHeight, // Translate by half the screen’s height
-    duration: 1,
-    stagger: 0.12,
-    ease: CustomEase.create("custom", "M0,0 C0,0 0.03,0.8 0.5,0.5 0.8,0.4 1,1 1,1"),
-}, 'step') // The other 'step' tweens will start simultaneously in our timeline
-tl.to(cards, {
-    rotation: () => { return (Math.random() - 0.5) * 20 }, // Method to have a unique value per card
-    stagger: 0.12,
-    duration: 0.5, // Lasts half as long as the movement tween
-    ease: 'power3.out', // Slows down towards the end of the rotation
-}, 'step')
-tl.to(cards, {
-    rotation: 0,
-    stagger: 0.12,
-    duration: 0.5, // Lasts half as long as the movement tween
-    ease: 'power3.in', // Slows down at the beginning of the rotation
-}, 'step+=0.5') // Starts halfway through the movement tween
-
-
-
-
-// Cards Pin – Features
-const root2 = document.querySelector('.section-features')
-const pinHeight2 = root2.querySelector('.pin-height')
-const container2 = root2.querySelector('.pin-container')
-
-ScrollTrigger.create({
-    trigger: pinHeight2, // We listen to pinHeight position
-    start:'top top',
-    end:'bottom bottom',
-    pin: container2, // We pin our container
-    // No extra space is added around the pinned element
-    pinSpacing: false,
-    scrub: true // Progresses with the scroll
-})
-
-const cards2 = root2.querySelectorAll('.pin-card')
-
-gsap.set(cards2, {
-  yPercent: 50, // Translate by half the element’s height
-  y: 0.5 * window.innerHeight, // Translate by half the screen’s height
-})
-
-const tl2 = gsap.timeline({
-  scrollTrigger: {
-      trigger: root2, // Based on the root of our component  
-      start: 'top top', // Starts when the top of root reaches the top of the viewport  
-      end: 'bottom bottom', // Ends when the bottom of root reaches the bottom of the viewport  
-      scrub: true, // Progresses with the scroll
-  }
-})
-
-tl2.to(cards2, {
-    yPercent: -50, // Translate by half the element’s height
-    y: -0.5 * window.innerHeight, // Translate by half the screen’s height
-    duration: 1,
-    stagger: 0.12,
-    ease: CustomEase.create("custom", "M0,0 C0,0 0.03,0.8 0.5,0.5 0.8,0.4 1,1 1,1"),
-}, 'step') // The other 'step' tweens will start simultaneously in our timeline
-tl2.to(cards2, {
-    rotation: () => { return (Math.random() - 0.5) * 20 }, // Method to have a unique value per card
-    stagger: 0.12,
-    duration: 0.5, // Lasts half as long as the movement tween
-    ease: 'power3.out', // Slows down towards the end of the rotation
-}, 'step')
-tl2.to(cards2, {
-    rotation: 0,
-    stagger: 0.12,
-    duration: 0.5, // Lasts half as long as the movement tween
-    ease: 'power3.in', // Slows down at the beginning of the rotation
-}, 'step+=0.5') // Starts halfway through the movement tween
-
-
-
 // Fixed Text Scroll
 function initStickyTitleScroll() {
   const wraps = document.querySelectorAll('[data-sticky-title="wrap"]');
@@ -418,37 +223,48 @@ gsap.utils.toArray(".image-wrap").forEach(wrap => {
 });
 
 // Marquee
-
-function initCSSMarquee() {
-  const pixelsPerSecond = 75; // Set the marquee speed (pixels per second)
+function initCSSMarquee(defaultPixelsPerSecond = 35) {
   const marquees = document.querySelectorAll('[data-css-marquee]');
-  
-  // Duplicate each [data-css-marquee-list] element inside its container
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      entry.target
+        .querySelectorAll('[data-css-marquee-list]')
+        .forEach(list => {
+          list.style.animationPlayState = entry.isIntersecting 
+            ? 'running' 
+            : 'paused';
+        });
+    });
+  }, { threshold: 0 });
+
   marquees.forEach(marquee => {
+    // read speed, or fall back to the default
+    const speedAttr = marquee.getAttribute('data-speed');
+    const pixelsPerSecond = speedAttr 
+      ? parseFloat(speedAttr) 
+      : defaultPixelsPerSecond;
+
+    // duplicate lists
     marquee.querySelectorAll('[data-css-marquee-list]').forEach(list => {
       const duplicate = list.cloneNode(true);
       marquee.appendChild(duplicate);
     });
-  });
 
-  // Create an IntersectionObserver to check if the marquee container is in view
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      entry.target.querySelectorAll('[data-css-marquee-list]').forEach(list => 
-        list.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused'
-      );
-    });
-  }, { threshold: 0 });
-  
-  // Calculate the width and set the animation duration accordingly
-  marquees.forEach(marquee => {
+    // set duration based on width / speed
     marquee.querySelectorAll('[data-css-marquee-list]').forEach(list => {
-      list.style.animationDuration = (list.offsetWidth / pixelsPerSecond) + 's';
+      const duration = list.offsetWidth / pixelsPerSecond;
+      list.style.animationDuration = duration + 's';
       list.style.animationPlayState = 'paused';
     });
+
     observer.observe(marquee);
   });
 }
+
+// run once on DOM ready
+document.addEventListener('DOMContentLoaded', initCSSMarquee);
+
+
 
 // Initialize CSS Marquee
 document.addEventListener('DOMContentLoaded', function() {
@@ -459,11 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function initScrollProgressBar() {  
 
   const progressBar = document.querySelector('.progress-bar');
-  const progressBarWrap = document.querySelector('.progress-bar-wrap');
 
   // Animate the progress bar as you scroll
   gsap.to(progressBar, {
-    scaleX: 1,
+    height: "100%",
     ease: 'none', // no ease, we control smoothness with the 'scrub' property
     scrollTrigger: {
       trigger: document.body, // Track the entire page
@@ -472,20 +287,9 @@ function initScrollProgressBar() {
       scrub: 0.5, // control the amount of time it takes for the bar to catch up with scroll position
     },
   });
-
-  // Click listener to scroll to a specific position, feel free to remove if you dont want it!
-  progressBarWrap.addEventListener('click', (event) => {
-    const clickX = event.clientX;
-    const progress = clickX / progressBarWrap.offsetWidth;
-    const scrollPosition = progress * (document.body.scrollHeight - window.innerHeight);
+};
   
-    gsap.to(window, {
-      scrollTo: scrollPosition,
-      duration: 0.725,
-      ease: 'power3.out',
-    });
-  });  
-}
+
 
 // Initialize Scroll Progress Bar
 document.addEventListener('DOMContentLoaded', () => {
@@ -554,30 +358,6 @@ function initFlipOnScroll() {
 // Initialize Scaling Elements on Scroll (GSAP Flip)
 document.addEventListener('DOMContentLoaded', function() {
   initFlipOnScroll();
-});
-
-// Button Hover
-$(".btn_wrap").each(function (index, btnWrap) {
-  // Get child elements of the current button wrapper
-  let bgPanel = $(btnWrap).children().eq(0);
-  let fgPanel = $(btnWrap).children().eq(1);
-
-  // Create a timeline for this button
-  let tl = gsap.timeline({ paused: true, defaults: { duration: 0.1, ease: "none" } });
-  tl.set(bgPanel, { opacity: 1 });
-  tl.fromTo(fgPanel, { clipPath: "polygon(100% 0%, 100% 100%, 100% 100%, 0% 100%, 0% 0%)" }, { clipPath: "polygon(100% 0%, 100% 0%, 0% 100%, 0% 100%, 0% 0%)" });
-  tl.fromTo(bgPanel, { clipPath: "polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%)" }, { clipPath: "polygon(100% 0%, 100% 100%, 0% 100%, 0% 100%, 100% 0%)" }, "<");
-  tl.to(fgPanel, { clipPath: "polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%)" });
-  tl.to(bgPanel, { clipPath: "polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%, 0% 0%)" }, "<");
-
-  // Attach hover events to the current button
-  $(btnWrap).on("mouseenter", function () {
-    tl.play();
-  });
-
-  $(btnWrap).on("mouseleave", function () {
-    tl.reverse();
-  });
 });
 
 // Contact Form – Checkbox Label Colour Change On Selected
@@ -683,3 +463,45 @@ gsap.to('.centred-title', {
         from: 'random' // Randomizes the animation order of letters
     }
 })
+
+// Buttons
+function initButtonCharacterStagger() {
+  const offsetIncrement = 0.01; // Transition offset increment in seconds
+  const buttons = document.querySelectorAll('[data-button-animate-chars]');
+
+  buttons.forEach(button => {
+    const text = button.textContent; // Get the button's text content
+    button.innerHTML = ''; // Clear the original content
+
+    [...text].forEach((char, index) => {
+      const span = document.createElement('span');
+      span.textContent = char;
+      span.style.transitionDelay = `${index * offsetIncrement}s`;
+
+      // Handle spaces explicitly
+      if (char === ' ') {
+        span.style.whiteSpace = 'pre'; // Preserve space width
+      }
+
+      button.appendChild(span);
+
+      // 2) On each .submit_button hover, toggle the “animate” class on its sibling
+      document.querySelectorAll('.submit_button').forEach(submit => {
+        // find the sibling element
+        const sibling = submit.nextElementSibling && submit.nextElementSibling.classList.contains('btn-animate-chars')
+          ? submit.nextElementSibling
+          : null;
+
+        if (!sibling) return;
+
+        submit.addEventListener('mouseenter', () => sibling.classList.add('animate'));
+        submit.addEventListener('mouseleave', () => sibling.classList.remove('animate'));
+      });
+    });
+  });
+}
+
+// Initialize Button Character Stagger Animation
+document.addEventListener('DOMContentLoaded', () => {
+  initButtonCharacterStagger();
+});
